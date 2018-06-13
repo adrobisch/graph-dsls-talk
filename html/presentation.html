@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="files/reveal.css">
+    <link rel="stylesheet" href="files/theme.css">
+    <link rel="stylesheet" href="files/default.css">
+    <link rel="stylesheet" href="files/katex.css">
+    <script src="files/katex.js"></script>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+        <h2>Graph DSLs (not-only) for Spark</h2><p> <img src="files/sparkles.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p></section>
+<section>
+<h1>About Us</h1></section>
+<section>
+<h2>Andreas Drobisch</h2><p>
+<em>
+<span>Data Engineer</span>
+</em>
+</p><p>
+<span>I like Scala and (free) food</span>
+</p><p> <img src="files/pizza.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p></section>
+<section>
+<p> <img src="files/fyber_logo_green.png" style="border: 0; max-height: 600px; max-height: 150px; box-shadow: none" /> </p>
+<ul>
+<li><p>
+<span>AdTech, 1 BLN devices reachable, creating more than 2 BLN events per day</span>
+</p></li>
+
+<li><p>
+<span>300+ people</span>
+</p></li>
+
+<li><p>
+<span>Offices in Berlin, Israel, Bejing, New York, London, San Francisco</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>Ad Tech</h2><p> <img src="files/how-a-dsp-work.jpg" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<p>
+<span>We like </span>
+ <img src="files/scala.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p><p> <img src="files/scaladayssponsor.png" style="border: 0; max-height: 600px; max-width: 300px" /> 
+ <img src="files/scalapenosponsor.png" style="border: 0; max-height: 600px; max-width: 400px" /> </p></section>
+<section>
+<p>
+<strong>
+<span>We are hiring</span>
+</strong>
+
+<span> (see the print-outs)</span>
+</p><p>
+<span>if interested, talk to us </span>
+ <img src="files/speech_balloon.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p></section>
+<section>
+<p>
+<strong>
+<span>Graph</span>
+</strong>
+
+<span> DSLs (not-only) for Spark</span>
+</p></section>
+<section>
+<h2>Graph definition</h2><div id="f53ae322-1e4a-4f97-bfcc-6c601511c0f0"></div>
+<script>
+katex.render(String.raw`G = (V, E) \\
+
+V = \mathbf{Vertices} \\
+
+E = \mathbf{Edges}
+`, window.document.getElementById("f53ae322-1e4a-4f97-bfcc-6c601511c0f0"), {
+  displayMode: true
+});
+</script></section>
+<section>
+<p><div id="d2b2b4e3-aacb-4251-867e-90c14f7e5e2f"></div>
+<script>
+katex.render(String.raw`E`, window.document.getElementById("d2b2b4e3-aacb-4251-867e-90c14f7e5e2f"), {
+  displayMode: false
+});
+</script></p><p>
+<span>defines the kind of graph</span>
+</p><p><div id="46b52cff-5ad5-4e23-ba7f-2e8eb268c942"></div>
+<script>
+katex.render(String.raw`E \subseteq V \times  V `, window.document.getElementById("46b52cff-5ad5-4e23-ba7f-2e8eb268c942"), {
+  displayMode: false
+});
+</script></p><p>
+<span>defines a (un)-directed graph</span>
+</p></section>
+<section>
+<h3>Examples</h3><h4>Clothing dependencies for developers</h4><p> <img src="files/clothing.png" style="border: 0; max-height: 600px; min-height: 500px" /> </p></section>
+<section>
+<h4>German Cities</h4><p> <img src="files/cities.png" style="border: 0; max-height: 600px; min-width: 700px" /> </p></section>
+<section>
+<h2>Other Examples</h2>
+<ul>
+<li><p>
+<span>family tree</span>
+</p></li>
+
+<li><p>
+<span>dependency tree</span>
+</p></li>
+
+<li><p>
+<span>JIRA issue dependencies / relations</span>
+</p></li>
+
+<li><p>
+<span>state machine transitions</span>
+</p></li>
+</ul>
+</section>
+<section>
+<p>
+<span>Graph </span>
+
+<strong>
+<span>DSL</span>
+</strong>
+
+<span>s (not-only) for Spark</span>
+</p></section>
+<section>
+<h2>Domain Specific Language</h2><blockquote><p>
+<span>"is a computer </span>
+
+<strong>
+<span>language</span>
+</strong>
+
+<span> that's targeted to a </span>
+
+<strong>
+<span>particular kind</span>
+</strong>
+
+<span> of problem, </span>
+
+<strong>
+<span>rather</span>
+</strong>
+
+<span> than a </span>
+
+<strong>
+<span>general purpose</span>
+</strong>
+
+<span> language that's aimed at any kind of software problem"</span>
+</p></blockquote><p>
+<span>Martin Fowler</span>
+</p></section>
+<section>
+<h3>Commonly Known DSLs</h3><p>
+<span>SQL, CSS, RegEx</span>
+</p></section>
+<section>
+<h2>DSL flavors</h2>
+<ul>
+<li><p>
+<strong>
+<span>internal / embedded</span>
+</strong>
+
+<span>: live inside a </span>
+
+<em>
+<span>host</span>
+</em>
+
+<span> language, allow to use host language to express domain statements</span>
+</p></li>
+
+<li><p>
+<strong>
+<span>external / standalone</span>
+</strong>
+
+<span>: own syntax, need their own parser</span>
+</p></li>
+
+<li><p>
+<span>can be mixed, resulting in tradeoffs in expressiveness</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>Running DSL programs</h2><p>
+<span>(embedded) </span>
+
+<strong>
+<span>interpreter</span>
+</strong>
+</p><p>
+<span>code </span>
+
+<strong>
+<span>generation</span>
+</strong>
+</p></section>
+<section>
+<p>
+<strong>
+<span>Functional</span>
+</strong>
+
+<span> interpreters / the </span>
+
+<strong>
+<span>Free</span>
+</strong>
+
+<span> monad can be considered </span>
+
+<strong>
+<span>embedded</span>
+</strong>
+
+<span> DSLs.</span>
+</p><p>
+<span>Great talk </span>
+
+<em>
+<span>"Functional interpreters and you"</span>
+</em>
+
+<span> from </span>
+
+<em>
+<span>Dave Gurnell</span>
+</em>
+
+<span> on that topic during Scala Days 2018 (Berlin).</span>
+</p></section>
+<section>
+<p>
+<span>Graph DSLs (not-only) for </span>
+
+<strong>
+<span>Spark</span>
+</strong>
+</p></section>
+<section>
+<h2>Spark</h2>
+<ul>
+<li><p>
+<span>open-source (in-memory) cluster-computing framework</span>
+</p></li>
+
+<li><p>
+<span>a big hammer in the data toolbox with SQL / Streaming / ML packages</span>
+</p></li>
+
+<li><p>
+<span>created to overcome Hadoop Map-Reduce issues</span>
+</p></li>
+</ul>
+</section>
+<section>
+<p>
+<span>mainly used for counting words </span>
+ <img src="files/trollface.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p><pre><code class="hljs scala">val textFile = sc.textFile(&quot;hdfs://...&quot;)
+val counts = textFile.flatMap(line =&gt; line.split(&quot; &quot;))
+                 .map(word =&gt; (word, 1))
+                 .reduceByKey(_ + _)
+counts.saveAsTextFile(&quot;hdfs://...&quot;)
+</code></pre></section>
+<section>
+<h2>Collection like interface</h2><p>
+<span>Using the Spark </span>
+
+<strong>
+<span>DataFrame</span>
+</strong>
+
+<span> API (examples from the Spark doc):</span>
+</p><pre><code class="hljs scala">val df: DataFrame = spark.read.json(&quot;examples/src/main/resources/people.json&quot;)
+
+// Displays the content of the DataFrame to stdout
+df.show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+
+</code></pre></section>
+<section>
+<h3>Select</h3><pre><code class="hljs scala">// Select everybody, but increment the age by 1
+df.select($&quot;name&quot;, $&quot;age&quot; + 1).show()
+// +-------+---------+
+// |   name|(age + 1)|
+// +-------+---------+
+// |Michael|     null|
+// |   Andy|       31|
+// | Justin|       20|
+// +-------+---------+
+
+</code></pre></section>
+<section>
+<h3>Filter</h3><pre><code class="hljs scala">// Select people older than 21
+df.filter($&quot;age&quot; &gt; 21).show()
+// +---+----+
+// |age|name|
+// +---+----+
+// | 30|Andy|
+// +---+----+
+</code></pre></section>
+<section>
+<h3>Group</h3><pre><code class="hljs scala">// Count people by age
+df.groupBy(&quot;age&quot;).count().show()
+// +----+-----+
+// | age|count|
+// +----+-----+
+// |  19|    1|
+// |null|    1|
+// |  30|    1|
+// +----+-----+
+</code></pre></section>
+<section>
+<h2>Domain Overview</h2></section>
+<section>
+<h2>Product</h2><p> <img src="files/i-can-haz-data.jpg" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<p>
+<span>Needs to </span>
+
+<strong>
+<span>analyse KPIs</span>
+</strong>
+
+<span> for a complex product (15+ event types).</span>
+</p><p>
+<span>Lots of </span>
+
+<strong>
+<span>data</span>
+</strong>
+
+<span> (think TBs, not GB), needs to be </span>
+
+<strong>
+<span>aggregated</span>
+</strong>
+
+<span>.</span>
+</p></section>
+<section>
+<h2>Data Team</h2><p>
+<span>Needs to write code to get that data continously in a </span>
+
+<em>
+<span>scala</span>
+</em>
+
+<span>ble way.</span>
+</p><p> <img src="files/compiling.png" style="border: 0; max-height: 600px;" /> 
+<code class="">https://www.xkcd.com/303</code></p></section>
+<section>
+<h2>Basic Pipeline</h2><p> <img src="files/spark-pipeline.png" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<h2>1. Iteration - Just Code</h2><pre><code class="hljs scala">data.select(groupCols: _*)
+    .withColumn(&quot;count&quot;, lit(1))
+    .groupBy(groupCols: _*)
+    .agg(&quot;count&quot; -&gt; &quot;sum&quot;)
+    .withColumnRenamed(&quot;sum(count)&quot;, &quot;count&quot;)
+</code></pre>
+<ul>
+<li><p>
+<span>Write Scala Spark code for all the aggregations</span>
+</p></li>
+
+<li><p>
+<span>Build some scripts and click around for scheduling jobs</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>Problems</h2></section>
+<section>
+<p>
+<span>Lacked clear </span>
+
+<strong>
+<span>separation</span>
+</strong>
+
+<span> between </span>
+
+<strong>
+<span>configuration</span>
+</strong>
+
+<span> / </span>
+
+<strong>
+<span>implementation</span>
+</strong>
+
+<span> of </span>
+
+<strong>
+<span>aggregations</span>
+</strong>
+
+<span> (hardcoded settings for output formats, mix-ups between outputs etc.)</span>
+</p></section>
+<section>
+<p>
+<span>Lots of </span>
+
+<strong>
+<span>manual configuration</span>
+</strong>
+
+<span> (mainly for Oozie, our scheduler at that time) and </span>
+
+<strong>
+<span>mismatches</span>
+</strong>
+
+<span> between stages</span>
+</p></section>
+<section>
+<p>
+<span>Understanding an aggregation needed </span>
+
+<em>
+<span>inside knowledge</span>
+</em>
+
+<span> of both the </span>
+
+<strong>
+<span>aggregation code</span>
+</strong>
+
+<span> and the involved </span>
+
+<strong>
+<span>configuration</span>
+</strong>
+
+<span> parts</span>
+</p></section>
+<section>
+<p><div id="ff646fb0-54fe-49fa-815a-a7382af73718"></div>
+<script>
+katex.render(String.raw`\Sigma`, window.document.getElementById("ff646fb0-54fe-49fa-815a-a7382af73718"), {
+  displayMode: false
+});
+</script></p><p>
+<span>creating, verifying and optimizing aggregations took a </span>
+
+<strong>
+<span>lot of time</span>
+</strong>
+</p></section>
+<section>
+<h2>Goals</h2></section>
+<section>
+
+<ul>
+<li><p>
+<span>Creating a new </span>
+
+<strong>
+<span>aggregation</span>
+</strong>
+
+<span> with already implemented logic should be a </span>
+
+<strong>
+<span>configuration</span>
+</strong>
+
+<span> task, not a coding task</span>
+</p></li>
+
+<li><p>
+<span>Aggregations </span>
+
+<strong>
+<span>logic</span>
+</strong>
+
+<span> should be </span>
+
+<strong>
+<span>transparent</span>
+</strong>
+
+<span>, also for outsiders / non-developers</span>
+</p></li>
+
+<li><p>
+<span>What can be </span>
+
+<strong>
+<span>automated</span>
+</strong>
+
+<span>, should be automated</span>
+</p></li>
+
+<li><p>
+<strong>
+<span>Information</span>
+</strong>
+
+<span> about aggregations can easily be </span>
+
+<strong>
+<span>shared</span>
+</strong>
+
+<span> across several components</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>The Solution ™</h2><blockquote><p>
+<span>All problems in computer science can be solved by another level of </span>
+
+<strong>
+<span>indirection</span>
+</strong>
+</p></blockquote><p>
+<span>David Wheeler</span>
+</p></section>
+<section>
+<p>
+<strong>
+<span>So we build an abstraction...</span>
+</strong>
+</p></section>
+<section>
+<h2>Spark graph DSL</h2><h3>Basic pattern</h3><p> <img src="files/basic_pattern.png" style="border: 0; max-height: 600px; min-width: 700px; box-shadow: none" /> </p><p>
+<span>Hello again </span>
+
+<strong>
+<span>IPO-Model / "EVA-Prinzip"</span>
+</strong>
+
+<span>.</span>
+</p></section>
+<section>
+<h2>Multiple IO</h2><p> <img src="files/multi_io.png" style="border: 0; max-height: 600px; min-width: 700px; box-shadow: none" /> </p></section>
+<section>
+<p> <img src="files/multi_io_concrete.png" style="border: 0; max-height: 600px; min-width: 700px; box-shadow: none" /> </p></section>
+<section>
+<p> <img src="files/spark-dsl-model.png" style="border: 0; max-height: 600px; max-width: 135%; margin-left: -140px;" /> </p></section>
+<section>
+<h2>Transformation Nodes</h2>
+<ul>
+<li><p>
+<span>Select</span>
+</p></li>
+
+<li><p>
+<span>Filter</span>
+</p></li>
+
+<li><p>
+<span>Group</span>
+</p></li>
+
+<li><p>
+<span>Aggregation</span>
+</p></li>
+
+<li><p>
+<span>...</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>Transformation Sequence</h2><p> <img src="files/dsl-sequence.png" style="border: 0; max-height: 600px; box-shadow: none; min-width: 800px" /> </p></section>
+<section>
+<h2>Graph Types</h2><pre><code class="hljs scala">trait DataNode
+trait InputNode extends DataNode
+trait OutputNode extends DataNode
+
+final case class HdfsPath(pathPattern: String) extends InputNode with OutputNode
+
+final case class DataFlow(
+  source: DataNode,
+  target: DataNode,
+  label: Option[String]
+) extends DirectedEdge[DataNode]
+
+trait DataGraph extends Graph[DataNode, DataFlow]
+</code></pre></section>
+<section>
+<h2>Transformation Types</h2><pre><code class="hljs scala">trait TransformationNode extends DataNode { def name: String }
+
+final case class Filter(
+  name: String,
+  conditions: Seq[Condition]
+) extends TransformationNode
+
+final case class Group(
+  name: String,
+  groupColumns: Seq[String],
+  columnAggregations: Seq[ColumnAggregationSpec]
+) extends TransformationNode
+
+trait SparkTransformation extends DataFrameProvider =&gt; Try[DataFrame]
+</code></pre></section>
+<section>
+<h2>Simple Data Graph</h2><pre><code class="hljs scala">val input = HdfsPath(...)
+
+val hdfsOutput = ImpalaOutput(HdfsPath(...))
+val mysqlOutput = MySQLOutput(topic, config = dbConfig)
+
+val filtering = Filter(s&quot;$topic-filter&quot;, 
+  Seq(Equals(&quot;ad_source&quot;, &quot;ad_marketplace&quot;))
+)
+
+val grouping = Group(
+  s&quot;$topic-group&quot;, 
+  groupColumns = Seq(&quot;country&quot;, &quot;ad_format&quot;)
+)
+
+val transformations = Transformations(s&quot;$topic-transformation&quot;, Seq(filtering, grouping))
+input ~&gt; transformations
+
+transformations ~&gt; hdfsOutput
+transformations ~&gt; mysqlOutput
+</code></pre></section>
+<section>
+<h2>Interpretation of the graph</h2><p>
+<strong>
+<span>traverse</span>
+</strong>
+
+<span> the graph</span>
+</p><p>
+<span>transformation </span>
+
+<strong>
+<span>nodes</span>
+</strong>
+
+<span> are mapped to Scala </span>
+
+<strong>
+<span>functions</span>
+</strong>
+</p><p>
+<span>sequences are </span>
+
+<strong>
+<span>composed</span>
+</strong>
+
+<span> functions</span>
+</p></section>
+<section>
+<h2>Node Context</h2><pre><code class="hljs scala">def inputs(node: DataNode, graph: DataGraph): Seq[InputNode] = graph.incoming(node).map(_.source).flatMap {
+  case input: InputNode =&gt; Some(input)
+  case impala: ImpalaOutput =&gt; Some(impala.data)
+  case _ =&gt; None
+}.toSeq
+
+def outputs(node: DataNode, graph: DataGraph): Seq[OutputNode] = graph.outgoing(node).map(_.target).flatMap {
+  case output: OutputNode =&gt; Some(output)
+  case _ =&gt; None
+}.toSeq
+</code></pre></section>
+<section>
+<h2>Filter Implementation</h2><pre><code class="hljs scala">case class FilteringTransformation(filtering: Filter) extends SparkTransformation 
+...
+
+filtering.conditions.foldLeft(df) {
+    (dfAcc, condition) =&gt; dfAcc.filter(booleanColumnExpression(condition, dfAcc.columns))
+}
+</code></pre></section>
+<section>
+<h2>Group Implementation</h2><pre><code class="hljs scala">case class GroupingTransformation(grouping: Group) extends SparkTransformation
+...
+
+grouping.columnAggregations.foldLeft(Seq(aggregationColumn as countCol)) {
+    case (accAggregations, aggregation) =&gt; aggregation.aggregation match {
+    case Sum =&gt;
+        accAggregations :+ sum(aggregation.column)
+    case Min =&gt;
+        accAggregations :+ min(aggregation.column)
+    case Max =&gt;
+        accAggregations :+ max(aggregation.column)
+    case Average =&gt;
+        accAggregations :+ avg(aggregation.column)
+    case CountDistinct =&gt;
+        accAggregations :+ countDistinct(aggregation.column)
+    case _ =&gt; accAggregations
+  }
+}
+</code></pre></section>
+<section>
+<h2>Leveraging the abstraction</h2></section>
+<section>
+<h2>Scheduler</h2><p>
+<span>We decided to use </span>
+<a target="_blank" href="https://airflow.incubator.apache.org/">Airflow</a>
+<span> which uses </span>
+
+<strong>
+<span>directed acyclic graphs (DAGs)</span>
+</strong>
+
+<span> to define the workflow.</span>
+</p><p> <img src="files/airflow_dag_list.png" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<p>
+<span>Perfect fit for our Graph </span>
+ <img src="files/thumbsup.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p><p> <img src="files/airflow_dag.png" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<p>
+<span>But you have to use </span>
+<code class="">python</code>
+<span> </span>
+ <img src="files/cry.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> 
+<span> ...</span>
+</p></section>
+<section>
+<h2>Lets generate DAGs!</h2><pre><code class="hljs python">with DAG('some-spark', catchup=False) as dag:
+    run_latest_only = LatestOnlyOperator(task_id='run-spark-shell', dag=dag)
+    run = BashOperator(
+        task_id='run_spark',
+        bash_command=transformation_command,
+        on_failure_callback = lambda context: error_notification(&quot;error in job: &quot;.format(ts = context[&quot;ts&quot;]), context)
+    )
+    run.set_upstream(run_latest_only)
+    
+    triggerNext1 = TriggerDagRunOperator(task_id = 'trigger_downstream1',
+                          trigger_dag_id = &quot;trigger_downstream1_dag&quot;,
+                          python_callable = trigger,
+                          dag=dag)
+    triggerNext1.set_upstream(run)
+
+// graph.outgoing ...
+
+    triggerNext2 = TriggerDagRunOperator(task_id = 'trigger_downstream1',
+                          trigger_dag_id = &quot;trigger_downstream1_dag&quot;,
+                          python_callable = trigger,
+                          dag=dag)
+    triggerNext2.set_upstream(run)
+...
+</code></pre></section>
+<section>
+<h2>Generated Diagram</h2><p> <img src="files/dsl-model-dot-graph.png" style="border: 0; max-height: 600px; min-width: 1200px" /> </p></section>
+<section>
+<h2>Operations</h2><p>
+<span>We can just go over graph (which is the source of truth) and execute an action:</span>
+</p><pre><code class="hljs scala">dataGraph.nodes.find(...).foreach { node =&gt;
+  // do something awesome
+}
+</code></pre></section>
+<section>
+<h2>Change the Flow</h2><p>
+<span>From</span>
+
+ <img src="files/multi_io_concrete.png" style="border: 0; max-height: 600px; max-width: 550px; box-shadow: none;" /> 
+<span> to</span>
+
+ <img src="files/io_graph_separated.png" style="border: 0; max-height: 600px; max-width:650px; box-shadow: none;" /> </p></section>
+<section>
+<p> <img src="files/money.gif" style="border: 0; max-height: 600px;" /> </p><h2>?</h2></section>
+<section>
+<h2>Problems</h2>
+<ul>
+<li><p>
+<span>tends to get a </span>
+
+<strong>
+<span>leaky</span>
+</strong>
+
+<span> abstraction, how to finetune Spark operational (memory, executoros) aspects?</span>
+</p></li>
+
+<li><p>
+<span>completeness of the abstraction (expression problem)</span>
+</p></li>
+
+<li><p>
+<span>definining the graph can be </span>
+
+<strong>
+<span>tedious</span>
+</strong>
+
+<span> vs just using the Spark method</span>
+</p></li>
+
+<li><p>
+<strong>
+<span>additional layer</span>
+</strong>
+
+<span> to maintain</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>Build your own graphs!</h2><h3>Free Ideas</h3>
+<ul>
+<li><p>
+<span>graph that models firewall rules and creates the config</span>
+</p></li>
+
+<li><p>
+<span>graph that documents your (µ-)services and converts it to markdown</span>
+</p></li>
+
+<li><p>
+<span>something that you might want to edit / generate outside your code, but run as code</span>
+</p></li>
+</ul>
+</section>
+<section>
+<h2>graphs library</h2><p><a target="_blank" href="https://github.com/flowtick/graphs">https://github.com/flowtick/graphs</a></p><p>
+<span>is a simple graph library for Scala and Scala.js, that we used to build our data graph.</span>
+</p></section>
+<section>
+<p>
+<span>The Spark part is not open-source</span>
+</p><p> <img src="files/cry.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p></section>
+<section>
+<h2>Why? (NIH?)</h2>
+<ul>
+<li><p>
+<span>Wanted to use it in the browser (Scala.js)</span>
+</p></li>
+
+<li><p>
+<span>GraphML support (for loading / saving from </span>
+<a target="_blank" href="https://www.yworks.com/yed">yed</a>
+<span>)</span>
+</p></li>
+
+<li><p>
+<span>many libraries are more storage focused</span>
+</p></li>
+
+<li><p>
+<span>Rúnar B. taught me to rewrite libraries in </span>
+ <img src="files/redbook.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> </p></li>
+</ul>
+</section>
+<section>
+<h2>Core Types</h2><pre><code class="hljs scala">trait Edge[E, N] {
+  def value: E
+  def predecessors: Set[N]
+  def successors: Set[N]
+}
+
+trait Graph[N, E] {
+  def nodes: Set[N]
+  def edges: Set[Edge[E, N]]
+
+  def incoming(node: N): Iterable[Edge[E, N]]
+  def outgoing(node: N): Iterable[Edge[E, N]]
+}
+
+// edge typeclass
+trait EdgeBuilder[N, E, B] {
+  def create(from: B)
+  (implicit identifiable: Identifiable[N]): Edge[E, N]
+}
+</code></pre></section>
+<section>
+<h3>Pants again</h3><p> <img src="files/clothing.png" style="border: 0; max-height: 600px; min-height: 300px" /> </p></section>
+<section>
+<h2>Example</h2><pre><code class="hljs scala">import com.flowtick.graphs.defaults._
+import com.flowtick.graphs.defaults.directed._
+
+val clothingDependencies = DefaultGraph.create(Seq(
+    n(&quot;Underpants&quot;) -&gt; n(&quot;Pants&quot;),
+    n(&quot;Pants&quot;) -&gt; n(&quot;Coat&quot;),
+    n(&quot;Pullover&quot;) -&gt; n(&quot;Coat&quot;),
+    n(&quot;Undershirt&quot;) -&gt; n(&quot;Pullover&quot;),
+    n(&quot;Pants&quot;) -&gt; n(&quot;Shoes&quot;),
+    n(&quot;Socks&quot;) -&gt; n(&quot;Shoes&quot;)))
+</code></pre></section>
+<section>
+<h2>Supported Algorithms</h2>
+<ul>
+<li><p>
+<span>Dijkstra (finds a shortest path in weighted graph)</span>
+</p></li>
+
+<li><p>
+<span>Breadth-First Search (search for node level by level)</span>
+</p></li>
+
+<li><p>
+<span>Depth-First Search (search for node path by path)</span>
+</p></li>
+
+<li><p>
+<span>Topological Sorting (finds an ordering in a directed graph)</span>
+</p></li>
+</ul>
+</section>
+<section>
+<pre><code class="hljs scala">import com.flowtick.graphs.algorithm._
+
+println(clothingDependencies.topologicalSort)
+//
+List(
+    DefaultNode(Socks), 
+    DefaultNode(Undershirt), 
+    DefaultNode(Pullover),
+    DefaultNode(Underpants),
+    DefaultNode(Pants), 
+    DefaultNode(Shoes), 
+    DefaultNode(Coat)
+)
+</code></pre></section>
+<section>
+<h2>Inheritance vs type classes</h2><p> <img src="files/edge_classes.png" style="border: 0; max-height: 600px;" /> </p></section>
+<section>
+<pre><code class="hljs scala">implicit def edgeBuilder[N]: EdgeBuilder[N, DefaultEdge[N], (N, N)] = new EdgeBuilder[N, DefaultEdge[N], (N, N)] {
+    override def create(from: (N, N))
+    (implicit identifiable: Identifiable[N]): DefaultEdge[N] = 
+      DefaultEdge(from._1, Some(from._2))
+}
+
+implicit def weightedEdgeBuilder[E, N, V, B]
+(implicit edgeBuilder: EdgeBuilder[N, E, B]): EdgeBuilder = ...
+</code></pre></section>
+<section>
+<h2>cats</h2><pre><code class="hljs scala">implicit def graphMonoid[N, E]: Monoid[Graph[N, E]] = new Monoid[Graph[N, E]] {
+  override def empty: Graph[N, E] = Graph.empty()
+
+  override def combine(x: Graph[N, E], y: Graph[N, E]): Graph[N, E] =
+    Graph[N, E](x.nodes ++ y.nodes, x.edges ++ y.edges)
+}
+</code></pre></section>
+<section>
+<h3>Combined Graphs</h3><p> <img src="files/monoid-example.png" style="border: 0; max-height: 600px; box-shadow: none" /> </p></section>
+<section>
+<h2>project</h2><p>
+<span>is still in </span>
+
+<strong>
+<span>design exploration</span>
+</strong>
+
+<span> phase</span>
+</p><p>
+<strong>
+<span>contributions</span>
+</strong>
+
+<span> welcome !</span>
+</p></section>
+<section>
+<h2>tl;dr;</h2>
+<ul>
+<li><p>
+<span>Graphs are proved useful for our </span>
+
+<strong>
+<span>data dependency</span>
+</strong>
+
+<span> and Spark transformation definitions</span>
+</p></li>
+
+<li><p>
+<span>our abstraction helped to automate maintenance tasks, document our domain</span>
+</p></li>
+
+<li><p>
+<span>not without problems (</span>
+
+<strong>
+<span>abstractions</span>
+</strong>
+
+<span> deliver tradeoffs)</span>
+</p></li>
+
+<li><p>
+<span>you can build your own graphs using </span>
+<code class="">graphs</code></p></li>
+</ul>
+</section>
+<section>
+<p> <img src="files/keen4-Questions.png" style="border: 0; max-height: 600px; min-height: 250px" /> </p><p>
+<strong>
+<span>Thanks for coming.</span>
+</strong>
+</p><p> <img src="files/cup-with-straw.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> 
+<span>, </span>
+ <img src="files/beer.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> 
+<span> + </span>
+ <img src="files/pizza.png" style="border: 0; box-shadow: none; vertical-align: bottom;" /> 
+<span>!</span>
+</p>
+        </section>
+    </div>
+</div>
+<script src="files/highlight.js"></script>
+<script src="files/reveal.js"></script>
+<script src="files/highlight.js"></script>
+<script>
+    Reveal.initialize({ history: true });
+    hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>
+         
